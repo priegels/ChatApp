@@ -1,8 +1,9 @@
 import React from 'react';
 // importing Components from react native
-import { StyleSheet, View, Text, TextInput, Pressable, ImageBackground } from 'react-native';
+import { StyleSheet, View, Text, TextInput, Pressable, ImageBackground, Image } from 'react-native';
 // importing images and icons
 import BackgroundImage from '../assets/background-image.png';
+import icon from '../assets/usericon.png';
 
 export default class Start extends React.Component {
   constructor(props) {
@@ -21,10 +22,12 @@ export default class Start extends React.Component {
       <View style={styles.container}>
         <ImageBackground source={BackgroundImage} resizeMode='cover' style={styles.backgroundImage}>
           <View style={styles.titleBox}> 
-            <Text style={styles.title}>App Title</Text>
+            <Text style={styles.title}>App Title</Text> 
           </View>
+
           <View style={styles.box1}>
             <View style={styles.inputBox}>
+              <Image source={icon} style={styles.image} />
               <TextInput
                 style={styles.yourName}
                 onChangeText={(text) => this.setState({ name: text})}
@@ -88,13 +91,20 @@ const styles = StyleSheet.create({
   },
 
   inputBox: {
-    borderWidth: 1,
+    borderWidth: 2,
     borderRadius: 1,
     borderColor: 'grey',
     width: '88%',
     height: 60,
-    justifyContent: 'center',
-    paddingLeft: 20
+    paddingLeft: 20,
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+
+  image: {
+    width: 20,
+    height: 20,
+    marginRight: 10
   },
 
   input: {
