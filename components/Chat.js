@@ -14,7 +14,8 @@ export default class Chat extends React.Component {
         flex: 1, 
         justifyContent: 'center', 
         alignItems: 'center',
-        backgroundColor: bgColor ? bgColor : "#fff"}}>
+        backgroundColor: bgColor
+        }}>
         <Text>Hello Chat!</Text>
       </View>
     )

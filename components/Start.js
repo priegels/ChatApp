@@ -12,7 +12,7 @@ export default class Start extends React.Component {
     // state will be updated with whatever values change for the specific states
     this.state = { 
       name: '',
-      bgColor: ''
+      bgColor: this.colors.blue
     };
   }
 
