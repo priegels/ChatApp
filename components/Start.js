@@ -57,24 +57,44 @@ export default class Start extends React.Component {
 
             <View style={styles.colorArray}>
               <TouchableOpacity 
+                accessible={true}
+                accessibilityLabel="Background color change"
+                accessibilityHint="Lets you choose a darker background color for the Chat Screen"
+                accessibilityRole="button"
                 style={styles.color1} 
                 onPress={() => this.changeBgColor(this.colors.dark)}>
               </TouchableOpacity>
               <TouchableOpacity 
+                accessible={true}
+                accessibilityLabel="Background color change"
+                accessibilityHint="Lets you choose purple background color for the Chat Screen"
+                accessibilityRole="button"
                 style={styles.color2}
                 onPress={() => this.changeBgColor(this.colors.purple)}>
               </TouchableOpacity>
               <TouchableOpacity 
+                accessible={true}
+                accessibilityLabel="Background color change"
+                accessibilityHint="Lets you choose blue background color for the Chat Screen"
+                accessibilityRole="button"
                 style={styles.color3}
                 onPress={() => this.changeBgColor(this.colors.blue)}>
               </TouchableOpacity>
               <TouchableOpacity 
+                accessible={true}
+                accessibilityLabel="Background color change"
+                accessibilityHint="Lets you choose green background color for the Chat Screen"
+                accessibilityRole="button"
                 style={styles.color4}
                 onPress={() => this.changeBgColor(this.colors.green)}>
               </TouchableOpacity>     
             </View>
 
             <Pressable
+              accessible={true}
+              accessibilityLabel="Start chat"
+              accessibilityHint="Lets you navigate to the Chat Screen"
+              accessibilityRole="button"
               style={styles.button}
               onPress={() => this.props.navigation.navigate('Chat', { 
                 name: this.state.name,
