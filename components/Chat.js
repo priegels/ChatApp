@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Platform, KeyboardAvoidingView } from 'react-native';
 
-import { GiftedChat, Bubble, Day} from 'react-native-gifted-chat';
+import { GiftedChat, Bubble, Day, SystemMessage} from 'react-native-gifted-chat';
 
 export default class Chat extends React.Component {
 
@@ -16,11 +16,13 @@ export default class Chat extends React.Component {
 with static message so you see each element of the UI displayed on screen with setState function */
 
   componentDidMount() {
+    const name = this.props.route.params.name;
+
     this.setState({
       messages: [
         {
           _id: 1,
-          text: 'Hello developer',
+          text: 'Hello ' + name,
           createdAt: new Date(),
           user: {
             _id: 2,
@@ -30,9 +32,10 @@ with static message so you see each element of the UI displayed on screen with s
         },
         {
           _id: 2,
-          text: 'This is a system message',
+          text: name + ' has entered the chat',
           createdAt: new Date(),
           system: true,
+          fontsColor: '#000'
         },
       ],
     });
@@ -44,6 +47,7 @@ with static message so you see each element of the UI displayed on screen with s
     }));
   }
 
+  //renderBubble function defines style of user messages
   renderBubble(props) {
     return (
       <Bubble
@@ -56,10 +60,23 @@ with static message so you see each element of the UI displayed on screen with s
     )
   };
 
+
+  //renderDay function renders a message showing the date of the chat; the text color depends on the set background color
   renderDay(props) {
     const { bgColor } = this.props.route.params;
     return (
       <Day
+        {...props}
+        textStyle= {{color: bgColor === '#B9C6AE' ? '#555555' : '#dddddd'}}
+      />
+    );
+  }
+
+  //renderSystemMessage function renders a system message; the text color depends on the set background color
+  renderSystemMessage(props) {
+    const { bgColor } = this.props.route.params;
+    return (
+      <SystemMessage
         {...props}
         textStyle= {{color: bgColor === '#B9C6AE' ? '#555555' : '#dddddd'}}
       />
@@ -71,6 +88,7 @@ with static message so you see each element of the UI displayed on screen with s
     let name = this.props.route.params.name;
     this.props.navigation.setOptions({ title: name});
 
+    // color picked in Start screen gets applied for chat screen
     const { bgColor } = this.props.route.params;
 
     return (
@@ -84,6 +102,7 @@ with static message so you see each element of the UI displayed on screen with s
             onSend={(messages) => this.onSend(messages)}
             renderBubble={this.renderBubble.bind(this)}
             renderDay={this.renderDay.bind(this)}
+            renderSystemMessage={this.renderSystemMessage.bind(this)}
             user={{
               _id: 1,
             }}
