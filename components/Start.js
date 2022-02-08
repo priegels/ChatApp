@@ -1,6 +1,6 @@
 import React from 'react';
 // importing Components from react native
-import { StyleSheet, View, Text, TextInput, Pressable, ImageBackground, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TextInput, Pressable, ImageBackground, Image, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
 // importing images and icons
 import BackgroundImage from '../assets/background-image.png';
 import icon from '../assets/usericon.png';
@@ -106,7 +106,7 @@ export default class Start extends React.Component {
           </View>
 
         </ImageBackground>
-
+        { Platform.OS === 'ios' ? <KeyboardAvoidingView behavior="padding" /> : null }
       </View>
     )
   }
@@ -121,6 +121,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    flex: 1
   },
 
   titleBox: {
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
 
   box1: {
     backgroundColor: 'white', 
-    height: '44%',
+    height: 350,
     width: '88%',
     justifyContent: 'space-around', 
     alignItems: 'center',
