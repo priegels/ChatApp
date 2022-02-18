@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Text, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, Platform, KeyboardAvoidingView } from 'react-native';
+import { GiftedChat, Bubble, Day, SystemMessage, InputToolbar} from 'react-native-gifted-chat';
 
-import { GiftedChat, Bubble, Day, SystemMessage} from 'react-native-gifted-chat';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 
 //importing firestore
 const firebase = require('firebase');
@@ -18,7 +20,8 @@ export default class Chat extends React.Component {
         _id: "",
         name: "",
         avatar: "",
-      }
+      },
+      isConnected: false
     }
 
     const firebaseConfig = {
@@ -37,6 +40,37 @@ export default class Chat extends React.Component {
     this.referenceChatMessages = firebase.firestore().collection('messages');
   }
 
+  async getMessages() {
+    let messages = '';
+    try {
+      messages = await AsyncStorage.getItem('messages') || [];
+      this.setState({
+        messages: JSON.parse(messages)
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  async saveMessages() {
+    try {
+      await AsyncStorage.setItem('messages', JSON.stringify(this.state.messages));
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  async deleteMessages() {
+    try {
+      await AsyncStorage.removeItem('messages');
+      this.setState({
+        messages: []
+      })
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
 /* componentDidMount function gets called after Chat component mounts. State gets set
 with static message so you see each element of the UI displayed on screen with setState function */
 
@@ -46,26 +80,46 @@ with static message so you see each element of the UI displayed on screen with s
     const name = this.props.route.params.name;
     this.props.navigation.setOptions({ title: name});
 
-    //authentication
-    this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
-      if (!user) {
-        await firebase.auth().signInAnonymously();
-      }
+    NetInfo.fetch().then(connection => {
+      if (connection.isConnected) {
+        this.setState({ isConnected: true });
+        console.log('online');
 
-      //update user state with currently active user data
-      this.setState({
-        uid: user.uid,
-        messages: [],
-        user: {
-          _id: user.uid,
-          name: name,
-          avatar: "https://placeimg.com/140/140/any"
+          //listener for collection updates
+          this.unsubscribe = this.referenceChatMessages
+          .orderBy('createdAt', 'desc')
+          .onSnapshot(this.onCollectionUpdate);
+
+          //authentication
+          this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
+            if (!user) {
+              await firebase.auth().signInAnonymously();
+            }
+
+          //update user state with currently active user data
+          this.setState({
+            uid: user.uid,
+            messages: [],
+            user: {
+              _id: user.uid,
+              name: name,
+              avatar: "https://placeimg.com/140/140/any"
+            },
+          });
+
+          this.refMsgsUser = firebase
+            .firestore()
+            .collection("messages")
+            .where("uid", "==", this.state.uid);
+
+        });
+        this.saveMessages();
+        } else {
+          // if user offline
+          this.setState({ isConnected: false });
+          console.log('offline');
+          this.getMessages();
         }
-      });
-      //listener for collection updates
-      this.unsubscribe = this.referenceChatMessages
-        .orderBy('createdAt', 'desc')
-        .onSnapshot(this.onCollectionUpdate);
     });
   }
 
@@ -89,6 +143,8 @@ with static message so you see each element of the UI displayed on screen with s
     this.setState({
       messages: messages
     });
+    // save messages to local AsyncStorge
+    this.saveMessages()
   };
 
   //adding new message to database collection
@@ -96,6 +152,7 @@ with static message so you see each element of the UI displayed on screen with s
     const message = this.state.messages[0];
     
     this.referenceChatMessages.add({
+      uid: this.state.uid,
       _id: message._id,
       text: message.text,
       createdAt: message.createdAt,
@@ -108,14 +165,19 @@ with static message so you see each element of the UI displayed on screen with s
     this.setState((previousState) => ({
       messages: GiftedChat.append(previousState.messages, messages),
     }), () => {
-      this.addMessage();
-    })
+      this.addMessage()
+      this.saveMessages();
+    });
   }
+
+
 
     //dont receive updates from collection
     componentWillUnmount() {
-      this.authUnsubscribe();
-      this.unsubscribe();
+      if (this.state.isConnected) {
+        this.authUnsubscribe();
+        this.unsubscribe();
+      }
     }
 
   //renderBubble function defines style of user messages
@@ -154,6 +216,17 @@ with static message so you see each element of the UI displayed on screen with s
     );
   }
 
+  renderInputToolbar(props) {
+    if (this.state.isConnected == false) {
+    } else {
+      return(
+        <InputToolbar
+        {...props}
+        />
+      );
+    }
+  }
+
   render() {
 
     // color picked in Start screen gets applied for chat screen
@@ -171,6 +244,7 @@ with static message so you see each element of the UI displayed on screen with s
             renderBubble={this.renderBubble.bind(this)}
             renderDay={this.renderDay.bind(this)}
             renderSystemMessage={this.renderSystemMessage.bind(this)}
+            renderInputToolbar={this.renderInputToolbar.bind(this)}
             user={{
               _id: this.state.user._id,
               name: this.state.name,
